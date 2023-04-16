@@ -1,6 +1,7 @@
 import math
 from enum import Enum
 from referee.game import Board, Action
+from referee.agent import PlayerColor
 # from abc import abstractmethod
 
 class MCState(Enum):
@@ -13,6 +14,7 @@ class MCNode:
                  time_limit: float | None, 
                  space_limit: float | None,
                  board: Board, 
+                 color: PlayerColor,
                  action: Action = None,
                  parent = None,
                  ) -> None:
@@ -25,12 +27,18 @@ class MCNode:
         self.parent = parent
         self.children = []
         self.action = action
+        self.color = color
     
-    def is_over(self):
+    def is_over(self) -> bool:
         return self.board.game_over()
+    
+    def winner_color(self) -> PlayerColor | None:
+        return self.board.winner_color()
         
     def select(self):
-        # select the child with the highest UCB score
+        '''
+        Select the child with the highest UCB score.
+        '''
         best_score = -math.inf 
         best_child = None
         c = 1   # larger C, more adventurous
@@ -43,21 +51,38 @@ class MCNode:
         return best_child
 
     
-    def simulate(self):
-        pass
+    def simulate(self) -> PlayerColor:
+        '''
+        Perform a playout from the newly added node to a terminal  state, 
+        but dont add the moves/states explored in the playout to the search tree
+        Return the winner's color.
+        '''
+        if self.is_over():
+            return self.winner_color()
     
     def expand(self):
+        '''
+        Expand the node by adding to the tree a single new child from that node.
+        '''
         pass
     
-    def backpropagate(self, result):
+    def backpropagate(self, winColor: PlayerColor):
+        '''
+        Use the outcome from the playout to  update the statistics of each node 
+        from the newly added node back up to the route.
+        '''
         self.playouts += 1 
-        self.wins += result 
+        if (self.color == winColor):
+            self.wins += 1
         if self.parent is not None:
-            self.parent.backpropagate(result)
+            self.parent.backpropagate(winColor)
 
             
 def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Board): 
-    root = MCNode(time_limit=time_limit, space_limit=space_limit, board=board)
+    root = MCNode(time_limit=time_limit, space_limit=space_limit, 
+                  board=board, color=PlayerColor.RED)
+    
+    ### TODO: how to stop when the program reaches time/space limit
     num_iterations = 1000
     for i in range(num_iterations): 
         # Selection
@@ -70,10 +95,10 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Board)
             current_node = current_node.expand()
             
         # Simulation
-        playout_result = current_node.simulate()
+        result = current_node.simulate()
         
         # Backpropagation 
-        current_node.backpropagate(playout_result)
+        current_node.backpropagate(result)
     
     
     best_child = root.select()
