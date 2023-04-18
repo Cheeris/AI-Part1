@@ -46,7 +46,7 @@ class MatrixBoard:
                 for i in range(power):
                     print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                     r, q = self.update_r_q(r, q, dr, dq)
-                    self.state[curr_player][r][q] = self.state[opponent][r][q] + 1
+                    self.state[curr_player][r][q] += self.state[opponent][r][q] + 1
                     '''
                     if curr_player eats opponent's token, the power of the current player add the power
                     of the token eaten
@@ -56,7 +56,7 @@ class MatrixBoard:
                         self.blue_power -= self.state[opponent][r][q]
                     else:
                         self.red_power -= self.state[opponent][r][q]
-                        self.blue_power -= self.state[opponent][r][q]
+                        self.blue_power += self.state[opponent][r][q]
                     self.state[opponent][r][q] = 0
                     '''if the token is larger than 6, reduce the power of the current player by 7
                     and remove the token
