@@ -2,6 +2,7 @@ from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
     
 MAX_TURNS = 7 * 7 * 7
+BOARD_N = 7
 
 class MatrixBoard:
     def __init__(self, state, turn_count, red_power, blue_power) -> None:
@@ -20,10 +21,10 @@ class MatrixBoard:
                 q = cell.q
                 if (color == PlayerColor.RED):
                     self.state[0][r][q] = 1
-                    self.red_power+=1
+                    self.red_power += 1
                 else:
                     self.state[1][r][q] = 1
-                    self.blue_power+=1
+                    self.blue_power += 1
                 pass
             
             case SpreadAction(cell, direction):
@@ -31,6 +32,7 @@ class MatrixBoard:
                 q = cell.q
                 dr = direction.value.r
                 dq = direction.value.q
+                # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                 if (color == PlayerColor.RED):
                     curr_player = 0
                     opponent = 1
@@ -40,30 +42,31 @@ class MatrixBoard:
                 power = self.state[curr_player][r][q]
                 self.state[curr_player][r][q] = 0 #remove the token
                 
-                #Spread
+                # Spread
                 for i in range(power):
-                    r,q = self.update_r_q(r,q,dr,dq)
+                    print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
+                    r, q = self.update_r_q(r, q, dr, dq)
                     self.state[curr_player][r][q] = self.state[opponent][r][q] + 1
                     '''
-                    if Curr_player eat opponent's token, the power of the current player add the power
+                    if curr_player eats opponent's token, the power of the current player add the power
                     of the token eaten
                     '''
-                    if (curr_player==0):
-                        self.red_power+=self.state[opponent][r][q]
-                        self.blue_power-=self.state[opponent][r][q]
+                    if (curr_player == 0):
+                        self.red_power += self.state[opponent][r][q]
+                        self.blue_power -= self.state[opponent][r][q]
                     else:
-                        self.red_power-=self.state[opponent][r][q]
-                        self.blue_power-=self.state[opponent][r][q]
+                        self.red_power -= self.state[opponent][r][q]
+                        self.blue_power -= self.state[opponent][r][q]
                     self.state[opponent][r][q] = 0
                     '''if the token is larger than 6, reduce the power of the current player by 7
                     and remove the token
                     '''
-                    if self.state[curr_player][r][q] >6:
+                    if self.state[curr_player][r][q] > 6:
                         self.state[curr_player][r][q] = 0
-                        if (curr_player==0):
-                            self.red_power-=7
+                        if (curr_player == 0):
+                            self.red_power -= 7
                         else:
-                            self.blue_power-=7
+                            self.blue_power -= 7
                 pass
 
     def game_over(self) -> bool:
@@ -87,7 +90,7 @@ class MatrixBoard:
 
     
         # Function to update the r,q if they reach -1 or 7
-    def update_r_q(r, q, dr, dq) -> tuple:
+    def update_r_q(self, r, q, dr, dq) -> tuple:
         """
         Update the coordinates if the token reaches the edge.
         """
@@ -129,7 +132,7 @@ class MatrixBoard:
                 q = max(row - (dim - 1), 0) + col
                 
                 if (self.state[0, r, q] != 0) or (self.state[1, r, q] != 0):
-                    power = self.state[0, r, q]
+                    power = self.state[0, r, q] if self.state[0, r, q] != 0 else self.state[1, r, q] 
                     color = "r" if self.state[0, r, q] != 0 else "b"
                     text = f"{color}{power}".center(4)
                     if use_color:
