@@ -1,4 +1,6 @@
 import math
+import board
+import random
 from enum import Enum
 from referee.game import Board, Action
 from referee.agent import PlayerColor
@@ -64,7 +66,12 @@ class MCNode:
         '''
         Expand the node by adding to the tree a single new child from that node.
         '''
-        pass
+        valid_actions = board.get_valid_actions()
+        action = random.choice(valid_actions)
+        next_board = board.next_board(action)
+        child = MCNode(None, None, next_board, self.color, action, self)
+        self.children.append(child)
+        return child
     
     def backpropagate(self, winColor: PlayerColor):
         '''
