@@ -1,6 +1,6 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part B: Game Playing Agent
-from agent import Board
+from agent.board import MatrixBoard
 import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
@@ -18,7 +18,7 @@ class Agent:
         Initialise the agent.s
         """
         self._color = color
-        board = Board(np.zeros([2,7,7]), 0, 0, 0)
+        board = MatrixBoard(np.zeros([2,7,7]), 0, 0, 0)
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
