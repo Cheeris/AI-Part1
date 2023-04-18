@@ -66,7 +66,7 @@ class MCNode:
         '''
         Expand the node by adding to the tree a single new child from that node.
         '''
-        valid_actions = board.get_valid_actions()
+        valid_actions = board.get_valid_actions(self.color)
         action = random.choice(valid_actions)
         next_board = board.next_board(action)
         child = MCNode(None, None, next_board, self.color, action, self)

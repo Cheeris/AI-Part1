@@ -106,6 +106,34 @@ class MatrixBoard:
             q = 6
         return (r, q)
     
+
+    #function to get all valid actions in the current board
+    def get_valid_actions(self, color: PlayerColor):
+        output = []
+        if (color == PlayerColor.RED):
+            curr_player = 0
+            opponent = 1
+        else:
+            curr_player = 1
+            opponent = 0
+        empty = []
+        for r in range(7):
+            for q in range(7):
+                if (self.state[curr_player][r][q]==0):
+                    empty.add(HexPos(r,q))
+                else:
+                    output.add(SpreadAction(HexPos(r,q), HexDir.DownRight))
+                    output.add(SpreadAction(HexPos(r,q), HexDir.Down))
+                    output.add(SpreadAction(HexPos(r,q), HexDir.DownLeft))
+                    output.add(SpreadAction(HexPos(r,q), HexDir.UpLeft))
+                    output.add(SpreadAction(HexPos(r,q), HexDir.Up))
+                    output.add(SpreadAction(HexPos(r,q), HexDir.UpRight))
+        
+        for position in empty:
+            if (self.state[opponent][position.r][position.q]==0):
+                output.add(SpawnAction(position))
+        return output
+    
     def render(self, use_color: bool=False, use_unicode: bool=False) -> str:
         """
         Return a visualisation of the game board via a multiline string. The
