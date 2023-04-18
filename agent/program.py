@@ -18,7 +18,7 @@ class Agent:
         Initialise the agent.s
         """
         self._color = color
-        board = Board(np.zeros([2,7,7]))
+        board = Board(np.zeros([2,7,7]), 0, 0, 0)
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
