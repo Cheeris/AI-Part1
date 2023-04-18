@@ -44,7 +44,7 @@ class MatrixBoard:
                 
                 # Spread
                 for i in range(power):
-                    print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
+                    # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                     r, q = self.update_r_q(r, q, dr, dq)
                     self.state[curr_player][r][q] += self.state[opponent][r][q] + 1
                     '''
