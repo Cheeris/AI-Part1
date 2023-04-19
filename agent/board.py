@@ -1,8 +1,13 @@
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-    
+import random
+
 MAX_TURNS = 7 * 7 * 7
 BOARD_N = 7
+DRAW =0
+RED_WIN=1
+BLUE_WIN=2
+WIN_POWER_DIFF  = 2
 
 class MatrixBoard:
     def __init__(self, state, turn_count, red_power, blue_power) -> None:
@@ -134,6 +139,30 @@ class MatrixBoard:
                 output.add(SpawnAction(position))
         return output
     
+    #function to simulate a game from the current state
+    def playout(self, start_color:PlayerColor)-> PlayerColor | None:
+        playout_board = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
+        curr_player = start_color
+        while not (playout_board.game_over):
+            playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
+            actions = playout_board.get_valid_actions(curr_player)
+            action = random.choice(actions)
+            playout_board.apply_action(action)
+            playout_board.turn_count+=1
+        return playout_board.winner()
+        
+    # function to get the winner of the board
+    def winner(self)->PlayerColor | None:
+        if (self.red_power==0 & self.blue_power==0):
+            return None
+        elif (abs(self.red_power-self.blue_power)<WIN_POWER_DIFF):
+            return None
+        elif (self.red_power>self.blue_power):
+            return PlayerColor.RED
+        elif (self.red_power<self.blue_power):
+            return PlayerColor.BLUE
+
+
     def render(self, use_color: bool=False, use_unicode: bool=False) -> str:
         """
         Return a visualisation of the game board via a multiline string. The

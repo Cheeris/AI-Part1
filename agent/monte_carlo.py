@@ -51,17 +51,8 @@ class MCNode:
                 best_score = score 
                 best_child = child
         return best_child
-
     
-    def simulate(self) -> PlayerColor:
-        '''
-        Perform a playout from the newly added node to a terminal  state, 
-        but dont add the moves/states explored in the playout to the search tree
-        Return the winner's color.
-        '''
-        if self.is_over():
-            return self.winner_color()
-    
+    #expand the node of MCTS
     def expand(self):
         '''
         Expand the node by adding to the tree a single new child from that node.
@@ -102,7 +93,7 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Board)
             current_node = current_node.expand()
             
         # Simulation
-        result = current_node.simulate()
+        result = current_node.board.playout(result.color)
         
         # Backpropagation 
         current_node.backpropagate(result)
