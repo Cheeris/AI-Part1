@@ -87,9 +87,9 @@ class MatrixBoard:
             self.blue_power == 0
         ])
     
-    def next_board(self, action: Action):
+    def next_board(self, action: Action, playerColor: PlayerColor):
         next = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
-        next.apply_action(action)
+        next.apply_action(action, playerColor)
         next.turn_count = self.turn_count + 1
         return next
 
@@ -125,22 +125,22 @@ class MatrixBoard:
         for r in range(7):
             for q in range(7):
                 if (self.state[curr_player][r][q]==0 & (self.red_power+self.blue_power)<49):
-                    empty.add(HexPos(r,q))
+                    empty.append(HexPos(r,q))
                 else:
-                    output.add(SpreadAction(HexPos(r,q), HexDir.DownRight))
-                    output.add(SpreadAction(HexPos(r,q), HexDir.Down))
-                    output.add(SpreadAction(HexPos(r,q), HexDir.DownLeft))
-                    output.add(SpreadAction(HexPos(r,q), HexDir.UpLeft))
-                    output.add(SpreadAction(HexPos(r,q), HexDir.Up))
-                    output.add(SpreadAction(HexPos(r,q), HexDir.UpRight))
+                    output.append(SpreadAction(HexPos(r,q), HexDir.DownRight))
+                    output.append(SpreadAction(HexPos(r,q), HexDir.Down))
+                    output.append(SpreadAction(HexPos(r,q), HexDir.DownLeft))
+                    output.append(SpreadAction(HexPos(r,q), HexDir.UpLeft))
+                    output.append(SpreadAction(HexPos(r,q), HexDir.Up))
+                    output.append(SpreadAction(HexPos(r,q), HexDir.UpRight))
         
         for position in empty:
             if (self.state[opponent][position.r][position.q]==0):
-                output.add(SpawnAction(position))
+                output.append(SpawnAction(position))
         return output
     
     #function to simulate a game from the current state
-    def playout(self, start_color:PlayerColor)-> PlayerColor | None:
+    def playout(self, start_color:PlayerColor) -> PlayerColor | None:
         playout_board = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
         curr_player = start_color
         while not (playout_board.game_over):

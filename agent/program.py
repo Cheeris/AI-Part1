@@ -4,7 +4,7 @@ from agent.board import MatrixBoard
 import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-
+from agent.monte_carlo import monte_carlo_tree_search
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -18,23 +18,27 @@ class Agent:
         Initialise the agent.s
         """
         self._color = color
-        board = MatrixBoard(np.zeros([2,7,7]), 0, 0, 0)
+        self.board = MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0)
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
             case PlayerColor.BLUE:
                 print("Testing: I am playing as blue")
+        
 
     def action(self, **referee: dict) -> Action:
         """
         Return the next action to take.
         """
+        # return monte_carlo_tree_search(0, 0, self.board)
         match self._color:
             case PlayerColor.RED:
-                return SpawnAction(HexPos(3, 3))
+                # return SpawnAction(HexPos(3, 3))
+                return monte_carlo_tree_search(0, 0, self.board, self._color)
             case PlayerColor.BLUE:
                 # This is going to be invalid... BLUE never spawned!
-                return SpreadAction(HexPos(3, 3), HexDir.Up)
+                # return SpreadAction(HexPos(3, 3), HexDir.Up)
+                return monte_carlo_tree_search(0, 0, self.board, self._color)
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """

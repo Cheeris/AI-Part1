@@ -1,11 +1,13 @@
 import math
-import board
+# import board
 import random
 from enum import Enum
-from referee.game import Board, Action
-from referee.agent import PlayerColor
+from referee.game import \
+    PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
+from agent.board import MatrixBoard
 # from abc import abstractmethod
 
+# TODO: 如果一次就全部expand的话就不需要state
 class MCState(Enum):
     UNVISITIED = 0;
     UNEXPANDED = 1;
@@ -13,9 +15,7 @@ class MCState(Enum):
 
 class MCNode:
     def __init__(self, 
-                 time_limit: float | None, 
-                 space_limit: float | None,
-                 board: Board, 
+                 board: MatrixBoard, 
                  color: PlayerColor,
                  action: Action = None,
                  parent = None,
@@ -23,19 +23,27 @@ class MCNode:
         self.playouts = 0
         self.wins = 0
         self.state = MCState.UNVISITIED
-        self.time_limit = time_limit
-        self.space_limit = space_limit
         self.board = board
         self.parent = parent
         self.children = []
         self.action = action
         self.color = color
+        # self.ubc
     
     def is_over(self) -> bool:
         return self.board.game_over()
     
-    def winner_color(self) -> PlayerColor | None:
+    def winner_color(self) -> PlayerColor | None: 
         return self.board.winner_color()
+    
+    def _ucb(self, c):
+        '''
+        Calculate the UCB score.
+        '''
+        if self.playouts == 0:
+            return math.inf
+        return self.wins / self.playouts \
+                + c * math.sqrt(2 * math.log(self.playouts) / self.playouts)
         
     def select(self):
         '''
@@ -45,23 +53,28 @@ class MCNode:
         best_child = None
         c = 1   # larger C, more adventurous
         for child in self.children:
-            score = child.wins / child.playouts \
-                + c * math.sqrt(2 * math.log(self.playouts) / child.playouts)
+            score = child._ucb(c)
             if score > best_score: 
                 best_score = score 
                 best_child = child
         return best_child
     
-    #expand the node of MCTS
+    # expand the node of MCTS
     def expand(self):
         '''
         Expand the node by adding to the tree a single new child from that node.
         '''
-        valid_actions = board.get_valid_actions(self.color)
-        action = random.choice(valid_actions)
-        next_board = board.next_board(action)
-        child = MCNode(None, None, next_board, self.color, action, self)
-        self.children.append(child)
+        valid_actions = self.board.get_valid_actions(self.color)
+        # action = random.choice(valid_actions)
+        # next_board = board.next_board(action)
+        # child = MCNode(None, None, next_board, self.color, action, self)
+        # self.children.append(child)
+        for i in range(len(valid_actions)):
+            action = valid_actions[i]
+            next_board = self.board.next_board(action, self.color)
+            child = MCNode(next_board, PlayerColor.RED if self.color == PlayerColor.RED else PlayerColor.BLUE, action, self)
+            self.children.append(child)
+        self.state = MCState.EXPANDED
         return child
     
     def backpropagate(self, winColor: PlayerColor):
@@ -74,12 +87,13 @@ class MCNode:
             self.wins += 1
         if self.parent is not None:
             self.parent.backpropagate(winColor)
-
+        
             
-def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Board): 
-    root = MCNode(time_limit=time_limit, space_limit=space_limit, 
-                  board=board, color=PlayerColor.RED)
-    
+def monte_carlo_tree_search(time_limit: float, space_limit: float, board: MatrixBoard, playerColor: PlayerColor) -> Action: 
+    root = MCNode(board=board, color=playerColor)
+    '''
+    Perform Monte-Carlo Tree Search ALgorithm. 
+    '''
     ### TODO: how to stop when the program reaches time/space limit
     num_iterations = 1000
     for i in range(num_iterations): 
@@ -93,7 +107,7 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Board)
             current_node = current_node.expand()
             
         # Simulation
-        result = current_node.board.playout(result.color)
+        result = current_node.board.playout(current_node.color)
         
         # Backpropagation 
         current_node.backpropagate(result)
