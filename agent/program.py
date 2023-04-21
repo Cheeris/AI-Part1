@@ -44,10 +44,11 @@ class Agent:
         """
         Update the agent with the last player's action.
         """
-        match action:
-            case SpawnAction(cell):
-                print(f"Testing: {color} SPAWN at {cell}")
-                pass
-            case SpreadAction(cell, direction):
-                print(f"Testing: {color} SPREAD from {cell}, {direction}")
-                pass
+        # match action:
+        #     case SpawnAction(cell):
+        #         print(f"Testing: {color} SPAWN at {cell}")
+        #         pass
+        #     case SpreadAction(cell, direction):
+        #         print(f"Testing: {color} SPREAD from {cell}, {direction}")
+        #         pass
+        self.board.next_board(action, PlayerColor.RED if color == PlayerColor.BLUE else PlayerColor.RED)

@@ -124,9 +124,9 @@ class MatrixBoard:
         empty = []
         for r in range(7):
             for q in range(7):
-                if (self.state[curr_player][r][q]==0 & (self.red_power+self.blue_power)<49):
+                if (self.state[curr_player][r][q]==0 and (self.red_power+self.blue_power)<49):
                     empty.append(HexPos(r,q))
-                else:
+                elif (self.state[curr_player][r][q] !=0 ):
                     output.append(SpreadAction(HexPos(r,q), HexDir.DownRight))
                     output.append(SpreadAction(HexPos(r,q), HexDir.Down))
                     output.append(SpreadAction(HexPos(r,q), HexDir.DownLeft))
