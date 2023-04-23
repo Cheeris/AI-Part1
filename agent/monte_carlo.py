@@ -71,7 +71,7 @@ class MCNode:
         # if len(self.all_actions) == 0 and len(self.children) == 0:
         if self.state == MCState.UNVISITIED:
             self.all_actions = self.board.get_valid_actions(self.color)
-            self.state = MCState.UNEXPANDED
+            self.state = MCState.UNEXPANDED if len(self.all_actions) != 0 else MCState.EXPANDED
             
         # randomly pick one action
         random.seed(100)
@@ -114,15 +114,18 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Matrix
         # print("----SEARCH: %d----" %i)
         # Selection
         current_node = root
-        while len(current_node.children) != 0: # find the leaf node
+        # while len(current_node.children) != 0: # find the leaf node
+        #     current_node = current_node.select()
+        while current_node.state == MCState.EXPANDED:
             current_node = current_node.select()
             
-        # Expansion
+        # Expand one node if node's state is UNVISITED or UNEXPANDED
         if not current_node.is_over():
-            current_node = current_node.expand()  # expand and select one
+            current_node = current_node.expand()  
             
         # Simulation
         result = current_node.board.playout(current_node.color)
+        # result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 
         current_node.backpropagate(result)
