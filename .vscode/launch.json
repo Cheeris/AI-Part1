@@ -24,7 +24,7 @@
             "type": "python",
             "request": "launch",
             "module": "referee",
-            "args": ["agent", "agent"],
+            "args": ["alpha_beta", "alpha_beta"],
             "console": "integratedTerminal"
         }
     ]
