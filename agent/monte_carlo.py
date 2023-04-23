@@ -7,7 +7,6 @@ from referee.game import \
 from agent.board import MatrixBoard
 # from abc import abstractmethod
 
-# TODO: 如果一次就全部expand的话就不需要state
 class MCState(Enum):
     UNVISITIED = 0;
     UNEXPANDED = 1;
@@ -26,6 +25,7 @@ class MCNode:
         self.board = board
         self.parent = parent
         self.children = []
+        self.all_actions = []
         self.action = action
         self.color = color
         # self.ubc
@@ -36,7 +36,7 @@ class MCNode:
     def winner_color(self) -> PlayerColor | None: 
         return self.board.winner_color()
     
-    def _ucb(self, c):
+    def ucb(self, c):
         '''
         Calculate the UCB score.
         '''
@@ -49,14 +49,16 @@ class MCNode:
         '''
         Select the child with the highest UCB score.
         '''
+        # print("--Select--")
         best_score = -math.inf 
         best_child = None
         c = 1   # larger C, more adventurous
         for child in self.children:
-            score = child._ucb(c)
+            score = child.ucb(c)
             if score > best_score: 
                 best_score = score 
                 best_child = child
+        
         return best_child
     
     # expand the node of MCTS
@@ -64,24 +66,36 @@ class MCNode:
         '''
         Expand the node by adding to the tree a single new child from that node.
         '''
-        valid_actions = self.board.get_valid_actions(self.color)
-        # action = random.choice(valid_actions)
-        # next_board = board.next_board(action)
-        # child = MCNode(None, None, next_board, self.color, action, self)
-        # self.children.append(child)
-        for i in range(len(valid_actions)):
-            action = valid_actions[i]
-            next_board = self.board.next_board(action, self.color)
-            child = MCNode(next_board, PlayerColor.RED if self.color == PlayerColor.RED else PlayerColor.BLUE, action, self)
-            self.children.append(child)
-        self.state = MCState.EXPANDED
-        return child
+        # print("--Expand--")
+        # if haven't get all the valid actions
+        # if len(self.all_actions) == 0 and len(self.children) == 0:
+        if self.state == MCState.UNVISITIED:
+            self.all_actions = self.board.get_valid_actions(self.color)
+            self.state = MCState.UNEXPANDED
+            
+        # randomly pick one action
+        random.seed(100)
+        action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
+        next_board = self.board.next_board(action, self.color)
+        child = MCNode(next_board, 
+                       PlayerColor.RED if self.color == PlayerColor.RED \
+                        else PlayerColor.BLUE, 
+                        action, 
+                        self)
+        self.children.append(child)
+        self.all_actions.remove(action)
+        
+        if len(self.all_actions) == 0 and len(self.children) != 0 and not self.is_over():
+            self.state = MCState.EXPANDED
+            
+        return self.select()
     
     def backpropagate(self, winColor: PlayerColor):
         '''
         Use the outcome from the playout to  update the statistics of each node 
         from the newly added node back up to the route.
         '''
+        # print("--backpropagate--")
         self.playouts += 1 
         if (self.color == winColor):
             self.wins += 1
@@ -95,23 +109,25 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Matrix
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
     ### TODO: how to stop when the program reaches time/space limit
-    num_iterations = 1000
+    num_iterations = 6
     for i in range(num_iterations): 
+        # print("----SEARCH: %d----" %i)
         # Selection
         current_node = root
-        while len(current_node.children) != 0:
+        while len(current_node.children) != 0: # find the leaf node
             current_node = current_node.select()
             
         # Expansion
         if not current_node.is_over():
-            current_node = current_node.expand()
+            current_node = current_node.expand()  # expand and select one
             
         # Simulation
         result = current_node.board.playout(current_node.color)
         
         # Backpropagation 
         current_node.backpropagate(result)
-    
+        
+        current_node = root
     
     best_child = root.select()
     return best_child.action

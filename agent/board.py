@@ -20,6 +20,7 @@ class MatrixBoard:
         self.blue_power = blue_power
         
     def apply_action(self, action: Action, color: PlayerColor):
+        
         match action:
             case SpawnAction(cell):
                 r = cell.r
@@ -152,16 +153,15 @@ class MatrixBoard:
         return playout_board.winner()
         
     # function to get the winner of the board
-    def winner(self)->PlayerColor | None:
-        if (self.red_power==0 & self.blue_power==0):
+    def winner(self) -> PlayerColor | None:
+        if (self.red_power == 0 and self.blue_power == 0):
             return None
-        elif (abs(self.red_power-self.blue_power)<WIN_POWER_DIFF):
+        elif (abs(self.red_power - self.blue_power) < WIN_POWER_DIFF):
             return None
-        elif (self.red_power>self.blue_power):
+        elif (self.red_power > self.blue_power):
             return PlayerColor.RED
-        elif (self.red_power<self.blue_power):
+        elif (self.red_power < self.blue_power):
             return PlayerColor.BLUE
-
 
     def render(self, use_color: bool=False, use_unicode: bool=False) -> str:
         """

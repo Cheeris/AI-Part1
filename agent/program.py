@@ -30,25 +30,24 @@ class Agent:
         """
         Return the next action to take.
         """
-        # return monte_carlo_tree_search(0, 0, self.board)
-        match self._color:
-            case PlayerColor.RED:
-                # return SpawnAction(HexPos(3, 3))
-                return monte_carlo_tree_search(0, 0, self.board, self._color)
-            case PlayerColor.BLUE:
-                # This is going to be invalid... BLUE never spawned!
-                # return SpreadAction(HexPos(3, 3), HexDir.Up)
-                return monte_carlo_tree_search(0, 0, self.board, self._color)
+        return monte_carlo_tree_search(0, 0, self.board, self._color)
+        # match self._color:
+        #     case PlayerColor.RED:
+        #         return SpawnAction(HexPos(3, 3))
+        #     case PlayerColor.BLUE:
+        #         # This is going to be invalid... BLUE never spawned!
+        #         return SpreadAction(HexPos(3, 3), HexDir.Up)
+
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
         Update the agent with the last player's action.
         """
-        # match action:
-        #     case SpawnAction(cell):
-        #         print(f"Testing: {color} SPAWN at {cell}")
-        #         pass
-        #     case SpreadAction(cell, direction):
-        #         print(f"Testing: {color} SPREAD from {cell}, {direction}")
-        #         pass
-        self.board.next_board(action, PlayerColor.RED if color == PlayerColor.BLUE else PlayerColor.RED)
+        match action:
+            case SpawnAction(cell):
+                print(f"Testing: {color} SPAWN at {cell}")
+                pass
+            case SpreadAction(cell, direction):
+                print(f"Testing: {color} SPREAD from {cell}, {direction}")
+                pass
+        self.board = self.board.next_board(action, color)
