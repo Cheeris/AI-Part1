@@ -4,7 +4,8 @@ from agent.board import MatrixBoard
 import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-from agent.monte_carlo import monte_carlo_tree_search
+from agent.monte_carlo import MCNode, monte_carlo_tree_search
+from agent.random_action import random_action
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -19,6 +20,7 @@ class Agent:
         """
         self._color = color
         self.board = MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0)
+        self.root = MCNode(MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0), color)
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
@@ -30,7 +32,12 @@ class Agent:
         """
         Return the next action to take.
         """
-        return monte_carlo_tree_search(0, 0, self.board, self._color)
+        if self._color == PlayerColor.RED:
+            result, self.root = monte_carlo_tree_search(self.root)
+            
+        else:
+            result = random_action(self.board, self._color)
+        return result
         # match self._color:
         #     case PlayerColor.RED:
         #         return SpawnAction(HexPos(3, 3))
@@ -51,3 +58,25 @@ class Agent:
                 print(f"Testing: {color} SPREAD from {cell}, {direction}")
                 pass
         self.board = self.board.next_board(action, color)
+        
+        if self._color == PlayerColor.BLUE:
+            return
+        
+        if color == self._color:
+            return
+        
+        if color != self._color:
+        # find the child whose action is the same as the opponent's
+            for i in range(len(self.root.children)):
+                if self.root.children[i].action == action:
+                    self.root = self.root.children[i]
+                    return 
+        
+            # not found. Create a new node
+            self.root = MCNode(self.root.board.next_board(action, color), 
+                            color=self._color,
+                            action=action,
+                            parent=self.root)
+        
+        
+        

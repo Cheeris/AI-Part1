@@ -103,8 +103,8 @@ class MCNode:
             self.parent.backpropagate(winColor)
         
             
-def monte_carlo_tree_search(time_limit: float, space_limit: float, board: MatrixBoard, playerColor: PlayerColor) -> Action: 
-    root = MCNode(board=board, color=playerColor)
+def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]: 
+    # root = MCNode(board=board, color=playerColor)
     '''
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
@@ -133,4 +133,5 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Matrix
         current_node = root
     
     best_child = root.select()
-    return best_child.action
+    
+    return best_child.action, best_child

@@ -14,7 +14,7 @@ class MatrixBoard:
         # create an empty board with each cell representing the power of player
         # channel 1: red 
         # channel 2: blue
-        self.state = state
+        self.state = state.copy()
         self.turn_count = turn_count
         self.red_power = red_power
         self.blue_power = blue_power
@@ -92,8 +92,8 @@ class MatrixBoard:
         next = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
         next.apply_action(action, playerColor)
         next.turn_count += 1
-        next.blue_power += 1 if playerColor == PlayerColor.BLUE else 0
-        next.red_power += 1 if playerColor == PlayerColor.RED else 0
+        # next.blue_power += 1 if playerColor == PlayerColor.BLUE else 0
+        # next.red_power += 1 if playerColor == PlayerColor.RED else 0
         return next
 
     
