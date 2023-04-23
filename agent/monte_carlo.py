@@ -78,7 +78,7 @@ class MCNode:
         action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
         next_board = self.board.next_board(action, self.color)
         child = MCNode(next_board, 
-                       PlayerColor.RED if self.color == PlayerColor.RED \
+                       PlayerColor.RED if self.color == PlayerColor.BLUE \
                         else PlayerColor.BLUE, 
                         action, 
                         self)
