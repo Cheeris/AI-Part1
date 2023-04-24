@@ -160,7 +160,7 @@ class MatrixBoard:
         return playout_board.winner()
     
     def playout_heuristic(self, start_color:PlayerColor) -> PlayerColor | None:
-        result = PlayerColor.RED if self.red_power > self.blue_power else PlayerColor.BLUE
+        result = PlayerColor.RED if self.red_power >= self.blue_power else PlayerColor.BLUE
         return result
         
     # function to get the winner of the board

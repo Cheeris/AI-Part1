@@ -109,7 +109,7 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
     ### TODO: how to stop when the program reaches time/space limit
-    num_iterations = 6
+    num_iterations = 100
     for i in range(num_iterations): 
         # print("----SEARCH: %d----" %i)
         # Selection
@@ -124,8 +124,8 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
             current_node = current_node.expand()  
             
         # Simulation
-        result = current_node.board.playout(current_node.color)
-        # result = current_node.board.playout_heuristic(current_node.color)
+        # result = current_node.board.playout(current_node.color)
+        result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 
         current_node.backpropagate(result)

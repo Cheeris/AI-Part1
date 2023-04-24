@@ -7,6 +7,8 @@ from referee.game import \
 from agent.monte_carlo import MCNode, monte_carlo_tree_search
 from agent.random_action import random_action
 
+LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/'
+
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
 # spreads a token at the centre of the board if playing as BLUE. This is
@@ -26,15 +28,25 @@ class Agent:
                 print("Testing: I am playing as red")
             case PlayerColor.BLUE:
                 print("Testing: I am playing as blue")
-        
+
 
     def action(self, **referee: dict) -> Action:
         """
         Return the next action to take.
         """
         if self._color == PlayerColor.RED:
-            result, self.root = monte_carlo_tree_search(self.root)
+            with open(LOG_PATH+'log/mcts_random_state.csv', mode='a') as file:
+                np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
             
+            result, self.root = monte_carlo_tree_search(self.root)
+            self.root.parent = None
+            
+            # Open the file in append mode
+            with open(LOG_PATH+'log/mcts_random_action.csv', mode='a') as file:
+                np.savetxt(file, convert_action_to_array(result), delimiter=',')
+            with open(LOG_PATH+'log/mcts_random_reward.csv', mode='a') as file:
+                reward = self.get_reward()
+                np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
         else:
             result = random_action(self.board, self._color)
         return result
@@ -59,6 +71,7 @@ class Agent:
                 pass
         self.board = self.board.next_board(action, color)
         
+        # TODO: 删掉random-action agent的时候删掉这一行
         if self._color == PlayerColor.BLUE:
             return
         
@@ -67,16 +80,37 @@ class Agent:
         
         if color != self._color:
         # find the child whose action is the same as the opponent's
+            found = False
             for i in range(len(self.root.children)):
                 if self.root.children[i].action == action:
                     self.root = self.root.children[i]
-                    return 
+                    found = True
+                    break
         
             # not found. Create a new node
-            self.root = MCNode(self.root.board.next_board(action, color), 
-                            color=self._color,
-                            action=action,
-                            parent=self.root)
+            if not found:
+                new_board = self.root.board.next_board(action, color)
+                self.root = MCNode(new_board,
+                                color=self._color,
+                                action=None,
+                                parent=None)
+            
+        with open(LOG_PATH+'log/mcts_random_state.csv', mode='a') as file:
+            np.savetxt(file, self.root.board.state.reshape([1,-1]), delimiter=',')
+        with open(LOG_PATH+'log/mcts_random_action.csv', mode='a') as file:
+            np.savetxt(file, convert_action_to_array(action), delimiter=',')
+        with open(LOG_PATH+'log/mcts_random_reward.csv', mode='a') as file:
+            reward = self.get_reward()
+            np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
         
+    def get_reward(self) -> int:
+        return (-1 if self._color == PlayerColor.BLUE else 1) * (self.board.red_power - self.board.blue_power)
         
-        
+def convert_action_to_array(action: Action):
+    match action:
+        case SpawnAction(cell):
+            return np.array([cell.r, cell.q, 0, 0], dtype=int).reshape([1,-1])
+            # pass
+        case SpreadAction(cell, direction):
+            return np.array([cell.r, cell.q, direction.r, direction.q], dtype=int).reshape([1,-1])
+            # pass
