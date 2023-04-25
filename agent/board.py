@@ -1,6 +1,7 @@
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 import random
+import numpy as np
 
 MAX_TURNS = 7 * 7 * 7
 BOARD_N = 7
@@ -15,7 +16,8 @@ class MatrixBoard:
         # create an empty board with each cell representing the power of player
         # channel 1: red 
         # channel 2: blue
-        self.state = state.copy()
+        # self.state = state.copy()
+        self.state = np.copy(state)
         self.turn_count = turn_count
         self.red_power = red_power
         self.blue_power = blue_power
@@ -130,7 +132,7 @@ class MatrixBoard:
             for q in range(7):
                 if (self.state[curr_player][r][q]==0 and (self.red_power+self.blue_power)<49):
                     empty.append(HexPos(r, q))
-                elif (self.state[curr_player][r][q] !=0 ):
+                elif (self.state[curr_player][r][q] != 0):
                     output.append(SpreadAction(HexPos(r,q), HexDir.DownRight))
                     output.append(SpreadAction(HexPos(r,q), HexDir.Down))
                     output.append(SpreadAction(HexPos(r,q), HexDir.DownLeft))
@@ -151,8 +153,8 @@ class MatrixBoard:
             playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
             actions = playout_board.get_valid_actions(curr_player)
             random.seed(SEED_VALUE)
-            action = actions[random.randint(0, len(actions) - 1)]
-            # action = random.choice(actions)
+            # action = actions[random.randint(0, len(actions) - 1)]
+            action = random.choice(actions)
             playout_board.apply_action(action, curr_player)
             playout_board.turn_count += 1
             

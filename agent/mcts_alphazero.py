@@ -1,5 +1,4 @@
 import math
-# import board
 import random
 from enum import Enum
 from referee.game import \
@@ -23,6 +22,7 @@ class MCNode:
                  ) -> None:
         self.playouts = 0
         self.wins = 0
+        self.q_value = 0
         self.state = MCState.UNVISITIED
         self.board = board
         self.parent = parent
@@ -35,16 +35,25 @@ class MCNode:
     def is_over(self) -> bool:
         return self.board.game_over()
     
+    # def winner_color(self) -> int: 
+    #     winner = self.board.winner_color()
+    #     if winner == self.color:
+    #         return 1
+    #     elif winner == None:
+    #         return 0
+    #     return -1
     
     def ucb(self, c):
         '''
         Calculate the UCB score.
         '''
         if self.playouts == 0:
-            return math.inf
-        return self.wins / self.playouts \
+            self.ucb = math.inf
+        else:
+            self.ucb = self.wins / self.playouts \
                 + c * math.sqrt(math.log(self.parent.playouts) / self.playouts)
-        
+    
+    
     def select(self):
         '''
         Select the child with the highest UCB score.
@@ -54,7 +63,8 @@ class MCNode:
         best_child = None
         c = 1   # larger C, more adventurous
         for child in self.children:
-            score = child.ucb(c)
+            child.ucb(c)
+            score = child.ucb + child.q_value
             if score > best_score: 
                 best_score = score 
                 best_child = child
@@ -75,8 +85,8 @@ class MCNode:
             
         # randomly pick one action
         random.seed(SEED_VALUE)
-        # action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
         action = random.choice(self.all_actions)
+        # action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
         next_board = self.board.next_board(action, self.color)
         child = MCNode(next_board, 
                        PlayerColor.RED if self.color == PlayerColor.BLUE \
@@ -100,6 +110,9 @@ class MCNode:
         self.playouts += 1 
         if (self.color == winColor):
             self.wins += 1
+            self.q_value += 1
+        elif winColor != None:  # lose
+            self.q_value -= 1
         if self.parent is not None:
             self.parent.backpropagate(winColor)
         
