@@ -8,6 +8,7 @@ DRAW =0
 RED_WIN=1
 BLUE_WIN=2
 WIN_POWER_DIFF  = 2
+SEED_VALUE = 100
 
 class MatrixBoard:
     def __init__(self, state, turn_count, red_power, blue_power) -> None:
@@ -149,7 +150,7 @@ class MatrixBoard:
         while not (playout_board.game_over()):
             playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
             actions = playout_board.get_valid_actions(curr_player)
-            random.seed(1000)
+            random.seed(SEED_VALUE)
             action = actions[random.randint(0, len(actions) - 1)]
             # action = random.choice(actions)
             playout_board.apply_action(action, curr_player)

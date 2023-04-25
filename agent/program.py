@@ -7,7 +7,7 @@ from referee.game import \
 from agent.monte_carlo import MCNode, monte_carlo_tree_search
 from agent.random_action import random_action
 
-LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/'
+LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/mcts500_random_seed100'
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -35,16 +35,16 @@ class Agent:
         Return the next action to take.
         """
         if self._color == PlayerColor.RED:
-            with open(LOG_PATH+'log/mcts_random_state.csv', mode='a') as file:
+            with open(LOG_PATH+'_state.csv', mode='a') as file:
                 np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
             
             result, self.root = monte_carlo_tree_search(self.root)
             self.root.parent = None
             
             # Open the file in append mode
-            with open(LOG_PATH+'log/mcts_random_action.csv', mode='a') as file:
+            with open(LOG_PATH+'_action.csv', mode='a') as file:
                 np.savetxt(file, convert_action_to_array(result), delimiter=',')
-            with open(LOG_PATH+'log/mcts_random_reward.csv', mode='a') as file:
+            with open(LOG_PATH+'_reward.csv', mode='a') as file:
                 reward = self.get_reward()
                 np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
         else:
@@ -95,11 +95,11 @@ class Agent:
                                 action=None,
                                 parent=None)
             
-        with open(LOG_PATH+'log/mcts_random_state.csv', mode='a') as file:
+        with open(LOG_PATH+'_state.csv', mode='a') as file:
             np.savetxt(file, self.root.board.state.reshape([1,-1]), delimiter=',')
-        with open(LOG_PATH+'log/mcts_random_action.csv', mode='a') as file:
+        with open(LOG_PATH+'_action.csv', mode='a') as file:
             np.savetxt(file, convert_action_to_array(action), delimiter=',')
-        with open(LOG_PATH+'log/mcts_random_reward.csv', mode='a') as file:
+        with open(LOG_PATH+'_reward.csv', mode='a') as file:
             reward = self.get_reward()
             np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
         

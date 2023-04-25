@@ -7,6 +7,8 @@ from referee.game import \
 from agent.board import MatrixBoard
 # from abc import abstractmethod
 
+SEED_VALUE = 100
+
 class MCState(Enum):
     UNVISITIED = 0;
     UNEXPANDED = 1;
@@ -74,7 +76,7 @@ class MCNode:
             self.state = MCState.UNEXPANDED if len(self.all_actions) != 0 else MCState.EXPANDED
             
         # randomly pick one action
-        random.seed(100)
+        random.seed(SEED_VALUE)
         action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
         next_board = self.board.next_board(action, self.color)
         child = MCNode(next_board, 
@@ -109,7 +111,7 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
     ### TODO: how to stop when the program reaches time/space limit
-    num_iterations = 100
+    num_iterations = 6
     for i in range(num_iterations): 
         # print("----SEARCH: %d----" %i)
         # Selection
@@ -124,8 +126,8 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
             current_node = current_node.expand()  
             
         # Simulation
-        # result = current_node.board.playout(current_node.color)
-        result = current_node.board.playout_heuristic(current_node.color)
+        result = current_node.board.playout(current_node.color)
+        # result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 
         current_node.backpropagate(result)
