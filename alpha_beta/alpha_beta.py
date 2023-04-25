@@ -18,12 +18,12 @@ class ABNode:
 
 def alpha_beta(node: ABNode, depth: int, alpha, beta, maximize:bool, color: PlayerColor):
     if (depth==0) or (node.board.game_over()):
-        return eval(node.board, PlayerColor.RED if color == PlayerColor.BLUE else PlayerColor.BLUE)
+        return eval(node.board, color)
     if (maximize==True):
         best = float('-inf')
         for child in node.children:
             child.add_children()
-            child_eval = alpha_beta(child, depth-1, alpha, beta, False, PlayerColor.RED if color == PlayerColor.BLUE else PlayerColor.BLUE)
+            child_eval = alpha_beta(child, depth-1, alpha, beta, False, color)
             best = max(best, child_eval)
             alpha = max(alpha, best)
             if beta<=alpha:
@@ -34,7 +34,7 @@ def alpha_beta(node: ABNode, depth: int, alpha, beta, maximize:bool, color: Play
         child_len = len(node.children)
         for child in node.children:
             child.add_children()
-            child_eval = alpha_beta(child, depth-1, alpha, beta, True, PlayerColor.RED if color == PlayerColor.BLUE else PlayerColor.BLUE)
+            child_eval = alpha_beta(child, depth-1, alpha, beta, True, color)
             worst = min(beta, child_eval)
             beta = min(beta, worst)
             if beta<=alpha:
