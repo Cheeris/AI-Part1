@@ -74,7 +74,7 @@ class MCNode:
             self.state = MCState.UNEXPANDED if len(self.all_actions) != 0 else MCState.EXPANDED
             
         # randomly pick one action
-        random.seed(SEED_VALUE)
+        # random.seed(SEED_VALUE)
         # action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
         action = random.choice(self.all_actions)
         next_board = self.board.next_board(action, self.color)

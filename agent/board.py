@@ -9,7 +9,7 @@ DRAW =0
 RED_WIN=1
 BLUE_WIN=2
 WIN_POWER_DIFF  = 2
-SEED_VALUE = 100
+SEED_VALUE = 102
 
 class MatrixBoard:
     def __init__(self, state, turn_count, red_power, blue_power) -> None:
@@ -23,7 +23,6 @@ class MatrixBoard:
         self.blue_power = blue_power
         
     def apply_action(self, action: Action, color: PlayerColor):
-        
         match action:
             case SpawnAction(cell):
                 r = cell.r
@@ -82,7 +81,7 @@ class MatrixBoard:
         """
         True if the game is over.
         """
-        if self.turn_count < 2: 
+        if self.turn_count <= 2: 
             return False
         
         return any([
@@ -127,11 +126,10 @@ class MatrixBoard:
         else:
             curr_player = 1
             opponent = 0
-        empty = []
-        for r in range(7):
-            for q in range(7):
-                if (self.state[curr_player][r][q]==0 and (self.red_power+self.blue_power)<49):
-                    empty.append(HexPos(r, q))
+        for r in range(BOARD_N):
+            for q in range(BOARD_N):
+                if (self.state[curr_player][r][q]==0 and self.state[opponent][r][q]==0 and (self.red_power+self.blue_power)<49):
+                    output.append(SpawnAction(HexPos(r, q)))
                 elif (self.state[curr_player][r][q] != 0):
                     output.append(SpreadAction(HexPos(r,q), HexDir.DownRight))
                     output.append(SpreadAction(HexPos(r,q), HexDir.Down))
@@ -140,30 +138,40 @@ class MatrixBoard:
                     output.append(SpreadAction(HexPos(r,q), HexDir.Up))
                     output.append(SpreadAction(HexPos(r,q), HexDir.UpRight))
         
-        for position in empty:
-            if (self.state[opponent][position.r][position.q]==0):
-                output.append(SpawnAction(position))
         return output
     
     #function to simulate a game from the current state
     def playout(self, start_color:PlayerColor) -> PlayerColor | None:
         playout_board = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
         curr_player = start_color
-        while not (playout_board.game_over()):
+        # depth_limit = 1000
+        # i = 0
+        while (not playout_board.game_over()) and playout_board.turn_count > 150:
             playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
             actions = playout_board.get_valid_actions(curr_player)
-            random.seed(SEED_VALUE)
+            # print(len(actions))
+            # i += 1
+                # print(actions)
+                # flag = False
+            # random.seed(SEED_VALUE)
             # action = actions[random.randint(0, len(actions) - 1)]
             action = random.choice(actions)
             playout_board.apply_action(action, curr_player)
             playout_board.turn_count += 1
-            
             curr_player = PlayerColor.BLUE if curr_player == PlayerColor.RED else PlayerColor.RED
-            
-        return playout_board.winner()
+        
+        if playout_board.game_over():
+            return playout_board.winner()
+        else:
+            return self.playout_heuristic()
     
-    def playout_heuristic(self, start_color:PlayerColor) -> PlayerColor | None:
-        result = PlayerColor.RED if self.red_power >= self.blue_power else PlayerColor.BLUE
+    def playout_heuristic(self) -> PlayerColor | None:
+        if self.red_power > self.blue_power:
+            result = PlayerColor.RED
+        elif self.red_power == self.blue_power:
+            result =  None
+        else:
+            result = PlayerColor.BLUE
         return result
         
     # function to get the winner of the board

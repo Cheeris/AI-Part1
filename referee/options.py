@@ -31,7 +31,7 @@ WAIT_NOVALUE = 0.5  # seconds (between turns)
 
 SPACE_LIMIT_DEFAULT = 0  # signifying no limit
 SPACE_LIMIT_NOVALUE = 250.0  # MB (each player)
-TIME_LIMIT_DEFAULT = 0  # signifying no limit
+TIME_LIMIT_DEFAULT = 1  # signifying no limit
 TIME_LIMIT_NOVALUE = 180.0  # seconds (each)
 
 VERBOSITY_LEVELS = 4

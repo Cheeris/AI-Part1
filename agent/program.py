@@ -4,10 +4,11 @@ from agent.board import MatrixBoard
 import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-from agent.monte_carlo import MCNode, monte_carlo_tree_search
+# from agent.monte_carlo import MCNode, monte_carlo_tree_search
 from agent.random_action import random_action
+from agent.mcts_alphazero import MCNode, monte_carlo_tree_search
 
-LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/mcts500_random_seed100'
+LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/random_random'
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -28,6 +29,7 @@ class Agent:
                 print("Testing: I am playing as red")
             case PlayerColor.BLUE:
                 print("Testing: I am playing as blue")
+    
 
 
     def action(self, **referee: dict) -> Action:
@@ -35,18 +37,18 @@ class Agent:
         Return the next action to take.
         """
         if self._color == PlayerColor.RED:
-            with open(LOG_PATH+'_state.csv', mode='a') as file:
-                np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
+            # with open(LOG_PATH+'_state.csv', mode='a') as file:
+            #     np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
             
             result, self.root = monte_carlo_tree_search(self.root)
             self.root.parent = None
             
             # Open the file in append mode
-            with open(LOG_PATH+'_action.csv', mode='a') as file:
-                np.savetxt(file, convert_action_to_array(result), delimiter=',')
-            with open(LOG_PATH+'_reward.csv', mode='a') as file:
-                reward = self.get_reward()
-                np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
+            # with open(LOG_PATH+'_action.csv', mode='a') as file:
+            #     np.savetxt(file, convert_action_to_array(result), delimiter=',')
+            # with open(LOG_PATH+'_reward.csv', mode='a') as file:
+            #     reward = self.get_reward()
+            #     np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
         else:
             result = random_action(self.board, self._color)
         return result
@@ -95,13 +97,13 @@ class Agent:
                                 action=None,
                                 parent=None)
             
-        with open(LOG_PATH+'_state.csv', mode='a') as file:
-            np.savetxt(file, self.root.board.state.reshape([1,-1]), delimiter=',')
-        with open(LOG_PATH+'_action.csv', mode='a') as file:
-            np.savetxt(file, convert_action_to_array(action), delimiter=',')
-        with open(LOG_PATH+'_reward.csv', mode='a') as file:
-            reward = self.get_reward()
-            np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
+        # with open(LOG_PATH+'_state.csv', mode='a') as file:
+        #     np.savetxt(file, self.root.board.state.reshape([1,-1]), delimiter=',')
+        # with open(LOG_PATH+'_action.csv', mode='a') as file:
+        #     np.savetxt(file, convert_action_to_array(action), delimiter=',')
+        # with open(LOG_PATH+'_reward.csv', mode='a') as file:
+        #     reward = self.get_reward()
+        #     np.savetxt(file, np.array([reward], dtype=int).reshape([1, -1]), delimiter=',')
         
     def get_reward(self) -> int:
         return (-1 if self._color == PlayerColor.BLUE else 1) * (self.board.red_power - self.board.blue_power)

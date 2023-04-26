@@ -56,16 +56,16 @@ class AgentProxyPlayer(Player):
 
         # Reraising exceptions as PlayerExceptions to determine win/loss
         # outcomes in calling code (see the 'game' module).
-        # except ResourceLimitException as e:
-        #     self._log.error(f"resource limit exceeded (pid={self._agent.pid}): {str(e)}")
-        #     self._log.error("\n")
-        #     self._log.error(self._summarise_status(self._agent.status))
-        #     self._log.error("\n")
+        except ResourceLimitException as e:
+            self._log.error(f"resource limit exceeded (pid={self._agent.pid}): {str(e)}")
+            self._log.error("\n")
+            self._log.error(self._summarise_status(self._agent.status))
+            self._log.error("\n")
 
-        #     raise self._InterceptExc(
-        #         f"resource limit exceeded in {self._name} agent class",
-        #         self._color
-        #     )
+            raise self._InterceptExc(
+                f"resource limit exceeded in {self._name} agent class",
+                self._color
+            )
 
         except WrappedProcessException as e:
             err_lines = str(e.args[1]["stacktrace_str"]).splitlines()

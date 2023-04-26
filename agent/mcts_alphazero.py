@@ -23,6 +23,7 @@ class MCNode:
         self.playouts = 0
         self.wins = 0
         self.q_value = 0
+        self.ucb = 0
         self.state = MCState.UNVISITIED
         self.board = board
         self.parent = parent
@@ -30,7 +31,6 @@ class MCNode:
         self.all_actions = []
         self.action = action
         self.color = color
-        # self.ubc
     
     def is_over(self) -> bool:
         return self.board.game_over()
@@ -43,7 +43,7 @@ class MCNode:
     #         return 0
     #     return -1
     
-    def ucb(self, c):
+    def update_ucb(self, c):
         '''
         Calculate the UCB score.
         '''
@@ -52,7 +52,7 @@ class MCNode:
         else:
             self.ucb = self.wins / self.playouts \
                 + c * math.sqrt(math.log(self.parent.playouts) / self.playouts)
-    
+        return 
     
     def select(self):
         '''
@@ -61,15 +61,27 @@ class MCNode:
         # print("--Select--")
         best_score = -math.inf 
         best_child = None
-        c = 1   # larger C, more adventurous
+        # if self.board.turn_count < 200 or self.board.red_power < self.board.blue_power:
+        #     c = 3   # larger C, more adventurous
+        # else:
+        #     c = 1
+        c = 2
         for child in self.children:
-            child.ucb(c)
-            score = child.ucb + child.q_value
+            child.update_ucb(c)
+            # score = child.ucb + child.q_value
+            score = child.ucb
             if score > best_score: 
                 best_score = score 
                 best_child = child
         
-        return best_child
+        if best_child != None:
+            return best_child
+        elif len(self.children) != 0:
+            print(len(self.children))
+            return self.children[0]
+        else:
+            print("Wrong")
+
     
     # expand the node of MCTS
     def expand(self):
@@ -84,7 +96,7 @@ class MCNode:
             self.state = MCState.UNEXPANDED if len(self.all_actions) != 0 else MCState.EXPANDED
             
         # randomly pick one action
-        random.seed(SEED_VALUE)
+        # random.seed(SEED_VALUE)
         action = random.choice(self.all_actions)
         # action = self.all_actions[random.randint(0, len(self.all_actions) - 1)]
         next_board = self.board.next_board(action, self.color)
@@ -113,6 +125,7 @@ class MCNode:
             self.q_value += 1
         elif winColor != None:  # lose
             self.q_value -= 1
+            self.wins -= 1
         if self.parent is not None:
             self.parent.backpropagate(winColor)
         
@@ -124,7 +137,7 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
     '''
     ### TODO: how to stop when the program reaches time/space limit
     num_iterations = 1000
-    for i in range(num_iterations): 
+    for _ in range(num_iterations): 
         # print("----SEARCH: %d----" %i)
         # Selection
         current_node = root
@@ -147,5 +160,13 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
         current_node = root
     
     best_child = root.select()
+    # print(root.board.turn_count)
+    # if (best_child == None):
+    #     print(root.all_actions)
+    #     print(root.action)
+    #     print(root.children)
+    #     print(root.playouts)
+    #     print(root.is_over())
+    #     print(root.board.turn_count)
     
     return best_child.action, best_child

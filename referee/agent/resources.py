@@ -48,11 +48,11 @@ class CountdownTimer:
         self._delta = elapsed
 
         # if we are limited, let's hope we aren't out of time!
-        if self._limit is not None and self._limit > 0:
-            if self._clock > self._limit:
-                raise ResourceLimitException(
-                    f"exceeded available time"
-                )
+        # if self._limit is not None and self._limit > 0:
+        #     if self._clock > self._limit:
+        #         raise ResourceLimitException(
+        #             f"exceeded available time"
+        #         )
 
 
 class MemoryWatcher:
