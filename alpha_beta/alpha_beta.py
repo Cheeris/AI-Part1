@@ -10,11 +10,17 @@ class ABNode:
         self.action = None
         
     def add_children(self):
+        all_children =[]
         for action in self.board.get_valid_actions(self.color):
             child_board= self.board.next_board(action, self.color)
             child = ABNode(child_board, PlayerColor.RED if self.color == PlayerColor.BLUE else PlayerColor.BLUE)
             child.action = action
+            all_children.append(child)
+        all_children.sort(key = key_function)
+        # use top K algorithm: select k nodes with highest utility
+        for child in all_children[:10]:
             self.children.append(child)
+
 
 def alpha_beta(node: ABNode, depth: int, alpha, beta, maximize:bool, color: PlayerColor):
     if (depth==0) or (node.board.game_over()):
@@ -54,6 +60,17 @@ def minimax_with_alpha_beta(node: ABNode, color:PlayerColor, depth:int):
     return random.choice(choices)
 
 def eval(board: MatrixBoard, color: PlayerColor):
+    if color == PlayerColor.RED:
+        return board.red_power-board.blue_power
+    else:
+        return board.blue_power-board.red_power
+    
+def key_function(obj):
+    util =-100
+    util = utility(obj.board, obj.color)
+    return (util, random.random())
+    
+def utility(board: MatrixBoard, color: PlayerColor):
     if color == PlayerColor.RED:
         return board.red_power-board.blue_power
     else:
