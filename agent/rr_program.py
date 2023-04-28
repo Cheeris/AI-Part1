@@ -8,7 +8,7 @@ from referee.game import \
 from agent.random_action import random_action
 from agent.mcts_alphazero import MCNode, monte_carlo_tree_search
 
-LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/mcts_random_1000_2'
+LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/rr_20'
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -29,9 +29,8 @@ class Agent:
                 print("Testing: I am playing as red")
             case PlayerColor.BLUE:
                 print("Testing: I am playing as blue")
-        with open(LOG_PATH+'_state.csv', mode='w') as file:
-            pass
-                # np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
+        with open(LOG_PATH+'.csv', mode='w') as file:
+            np.savetxt(file, self.board.state.reshape([1,2*7*7]), delimiter=',')
     
 
 
@@ -72,6 +71,10 @@ class Agent:
         """
         Update the agent with the last player's action.
         """
+        self.board = self.board.next_board(action, color)
+        if self._color == PlayerColor.RED:
+            with open(LOG_PATH+'.csv', mode='a') as file:
+                    np.savetxt(file, self.board.state.reshape([1,2*7*7]), delimiter=',')
         match action:
             case SpawnAction(cell):
                 print(f"Testing: {color} SPAWN at {cell}")
@@ -79,9 +82,6 @@ class Agent:
             case SpreadAction(cell, direction):
                 print(f"Testing: {color} SPREAD from {cell}, {direction}")
                 pass
-        self.board = self.board.next_board(action, color)
-        with open(LOG_PATH+'_state.csv', mode='a') as file:
-                np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
         
         # TODO: 删掉random-action agent的时候删掉这一行
         # if self._color == PlayerColor.BLUE:

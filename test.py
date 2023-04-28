@@ -3,7 +3,11 @@ import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from agent.mcts_alphazero import MCNode, monte_carlo_tree_search
-
+from agent.CNNModel import CNNModel
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
 # matrix = np.zeros([2,7,7], dtype=int)
 # matrix[0, 1, 4] = 6
 # matrix[1, 1, 2] = 1
@@ -32,9 +36,11 @@ from agent.mcts_alphazero import MCNode, monte_carlo_tree_search
 
 # print(board.render(use_color=True, use_unicode=True))
 # print("red_power=%d, blue_power=%d" %(board.red_power, board.blue_power))
-
+MODEL_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/rr_e100.pth'
 color = PlayerColor.RED
 board = MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0)
-root = MCNode(MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0), color)
+model = CNNModel()
+model.load_state_dict(torch.load(MODEL_PATH))
+root = MCNode(MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0), color, model=model)
 result, root = monte_carlo_tree_search(root)
 print(result)

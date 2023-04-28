@@ -4,6 +4,12 @@ from enum import Enum
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from agent.board import MatrixBoard
+from agent.CNNModel import CNNModel, convert_to_state_input
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+
 # from abc import abstractmethod
 
 SEED_VALUE = 100
@@ -17,8 +23,9 @@ class MCNode:
     def __init__(self, 
                  board: MatrixBoard, 
                  color: PlayerColor,
+                 model: CNNModel,
                  action: Action = None,
-                 parent = None,
+                 parent = None
                  ) -> None:
         self.playouts = 0
         self.wins = 0
@@ -31,6 +38,7 @@ class MCNode:
         self.all_actions = []
         self.action = action
         self.color = color
+        self.model = model
     
     def is_over(self) -> bool:
         return self.board.game_over()
@@ -65,11 +73,12 @@ class MCNode:
         #     c = 3   # larger C, more adventurous
         # else:
         #     c = 1
-        c = 2
+        # c = 2
         for child in self.children:
-            child.update_ucb(c)
+            # child.update_ucb(c)
             # score = child.ucb + child.q_value
-            score = child.ucb
+            # score = child.ucb
+            score = child.q_value
             if score > best_score: 
                 best_score = score 
                 best_child = child
@@ -103,8 +112,9 @@ class MCNode:
         child = MCNode(next_board, 
                        PlayerColor.RED if self.color == PlayerColor.BLUE \
                         else PlayerColor.BLUE, 
-                        action, 
-                        self)
+                        action=action, 
+                        parent=self,
+                        model=self.model)
         self.children.append(child)
         self.all_actions.remove(action)
         
@@ -113,22 +123,38 @@ class MCNode:
             
         return self.select()
     
-    def backpropagate(self, winColor: PlayerColor):
+    def backpropagate(self, win_score):
         '''
         Use the outcome from the playout to  update the statistics of each node 
         from the newly added node back up to the route.
         '''
         # print("--backpropagate--")
         self.playouts += 1 
-        if (self.color == winColor):
-            self.wins += 1
-            self.q_value += 1
-        elif winColor != None:  # lose
-            self.q_value -= 1
-            self.wins -= 1
-        if self.parent is not None:
-            self.parent.backpropagate(winColor)
         
+        if type(win_score) == PlayerColor:
+            if self.color == win_score:
+                self.wins += 1
+                self.q_value += 1
+            elif win_score != None:  # lose
+                self.q_value -= 1
+                self.wins -= 1
+        else:
+            if self.color == PlayerColor.RED:
+                self.q_value += win_score
+            else:
+                self.q_value -= win_score
+        if self.parent is not None:
+            self.parent.backpropagate(win_score)
+
+    def playout_model(self):
+        tmp = self.board.state
+        tmp = convert_to_state_input(tmp).reshape([1,2,7,7])
+        tmp_t = torch.from_numpy(tmp).float()
+        # print(self.model)
+        self.model.eval()
+        with torch.no_grad():
+            test_out = self.model(tmp_t).numpy()
+        return test_out[0][0]
             
 def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]: 
     # root = MCNode(board=board, color=playerColor)
@@ -136,7 +162,7 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
     ### TODO: how to stop when the program reaches time/space limit
-    num_iterations = 1000
+    num_iterations = 20000
     for _ in range(num_iterations): 
         # print("----SEARCH: %d----" %i)
         # Selection
@@ -151,7 +177,8 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
             current_node = current_node.expand()  
             
         # Simulation
-        result = current_node.board.playout(current_node.color)
+        # result = current_node.board.playout(current_node.color)
+        result = current_node.playout_model()
         # result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 

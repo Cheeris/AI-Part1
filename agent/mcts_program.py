@@ -9,6 +9,13 @@ from agent.random_action import random_action
 from agent.mcts_alphazero import MCNode, monte_carlo_tree_search
 
 LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/mcts_random_1000_2'
+MODEL_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/rr_e100.pth'
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+from CNNModel import CNNModel
+
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -23,7 +30,9 @@ class Agent:
         """
         self._color = color
         self.board = MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0)
-        self.root = MCNode(MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0), color)
+        self.model = CNNModel()
+        self.model.load_state_dict(torch.load(MODEL_PATH))
+        self.root = MCNode(MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0), color, self.model)
         match color:
             case PlayerColor.RED:
                 print("Testing: I am playing as red")
