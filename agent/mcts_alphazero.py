@@ -162,7 +162,7 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
     ### TODO: how to stop when the program reaches time/space limit
-    num_iterations = 20000
+    num_iterations = 50000
     for _ in range(num_iterations): 
         # print("----SEARCH: %d----" %i)
         # Selection

@@ -8,8 +8,8 @@ from referee.game import \
 from agent.random_action import random_action
 from agent.mcts_alphazero import MCNode, monte_carlo_tree_search
 
-LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/mcts_random_1000_2'
-MODEL_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/rr_e100.pth'
+LOG_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/agent/log/mcts_random_1000_3'
+MODEL_PATH = '/Users/clarec/Desktop/COMP30024-AI-ProjectB/minimax_e100.pth'
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -51,8 +51,8 @@ class Agent:
             
             result, self.root = monte_carlo_tree_search(self.root)
             self.root.parent = None
-            with open(LOG_PATH+'_state.csv', mode='a') as file:
-                np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
+            # with open(LOG_PATH+'_state.csv', mode='a') as file:
+            #     np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
             
         #     # Open the file in append mode
         #     # with open(LOG_PATH+'_action.csv', mode='a') as file:
@@ -63,8 +63,8 @@ class Agent:
         else:
             result = random_action(self.board, self._color)
             # Open the file in append mode
-            with open(LOG_PATH+'_state.csv', mode='a') as file:
-                np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
+            # with open(LOG_PATH+'_state.csv', mode='a') as file:
+            #     np.savetxt(file, self.root.board.state.reshape([1,2*7*7]), delimiter=',')
         return result
         # match self._color:
         #     case PlayerColor.RED:
