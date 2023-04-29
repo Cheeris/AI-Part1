@@ -2,6 +2,7 @@ from alpha_beta.board import MatrixBoard
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 import random
+import numpy
 class ABNode:
     def __init__(self, board: MatrixBoard, color: PlayerColor):
         self.board = MatrixBoard(board.state, board.turn_count, board.red_power, board.blue_power)
@@ -60,10 +61,30 @@ def minimax_with_alpha_beta(node: ABNode, color:PlayerColor, depth:int):
     return random.choice(choices)
 
 def eval(board: MatrixBoard, color: PlayerColor):
+    '''
+    red_num =0
+    blue_num = 0
+    red = [0,0,0,0,0,0]
+    blue = [0,0,0,0,0,0]
+    for r in range(7):
+        for q in range(7):
+            if board.state[0][r][q] != 0:
+                red[board.state[0][r][q]-1] +=1
+                red_num+=1
+            if board.state[1][r][q] != 0:
+                blue[board.state[1][r][q]-1] +=1
+                blue_num+=1
+    '''
+    unique,count = numpy.unique(board.state[0],return_counts=True)
+    red = dict(zip(unique, count))
+    unique,count = numpy.unique(board.state[1],return_counts=True)
+    blue = dict(zip(unique, count))
+    red_num = sum(red.values())
+    blue_num = sum(red.values())
     if color == PlayerColor.RED:
-        return board.red_power-board.blue_power
+        return 1*(red.get(1,0)-blue.get(1,0))+2*(red.get(2,0)-blue.get(2,0))+3*(red.get(3,0)-blue.get(3,0))+4*(red.get(4,0)-blue.get(4,0))+5*(red.get(5,0)-blue.get(5,0))+6*(red.get(6,0)-blue.get(6,0))+3*(red_num-blue_num)
     else:
-        return board.blue_power-board.red_power
+        return 1*(blue.get(1,0)-red.get(1,0))+2*(blue.get(2,0)-red.get(2,0))+3*(blue.get(3,0)-red.get(3,0))+4*(blue.get(4,0)-red.get(4,0))+5*(blue.get(5,0)-red.get(5,0))+6*(blue.get(6,0)-red.get(6,0))+3*(blue_num-red_num)
     
 def key_function(obj):
     util =-100

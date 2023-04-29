@@ -5,6 +5,7 @@ import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from agent.monte_carlo import monte_carlo_tree_search
+import random
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -30,7 +31,8 @@ class Agent:
         """
         Return the next action to take.
         """
-        return monte_carlo_tree_search(0, 0, self.board, self._color)
+        return random.choice(self.board.get_valid_actions(self._color))
+        #return monte_carlo_tree_search(0, 0, self.board, self._color)
         # match self._color:
         #     case PlayerColor.RED:
         #         return SpawnAction(HexPos(3, 3))
