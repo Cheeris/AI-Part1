@@ -1,4 +1,4 @@
-from alpha_beta.board import MatrixBoard
+from .board import MatrixBoard
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 import random
