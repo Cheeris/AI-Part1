@@ -2,10 +2,10 @@
 # Project Part B: Game Playing Agent
 from .board import MatrixBoard
 import numpy as np
+from .random_action import random_action
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from .alpha_beta import alpha_beta, ABNode, eval, minimax_with_alpha_beta
-import random
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
 # spreads a token at the centre of the board if playing as BLUE. This is
@@ -30,10 +30,12 @@ class Agent:
         """
         Return the next action to take.
         """
-        root = ABNode(self.board,self._color)
-        root.add_children()
-        # child_len = len(root.children)
-        return minimax_with_alpha_beta(root, self._color,3)
+        # root = ABNode(self.board,self._color)
+        # root.add_children()
+        # # child_len = len(root.children)
+        # return minimax_with_alpha_beta(root, self._color,3)
+        return random_action(self.board, self._color)
+        
         # match self._color:
         #     case PlayerColor.RED:
         #         return SpawnAction(HexPos(3, 3))
