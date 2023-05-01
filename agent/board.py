@@ -144,9 +144,9 @@ class MatrixBoard:
     def playout(self, start_color:PlayerColor) -> PlayerColor | None:
         playout_board = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
         curr_player = start_color
-        # depth_limit = 1000
-        # i = 0
-        while (not playout_board.game_over()):
+        depth_limit = 30
+        i = 0
+        while (not playout_board.game_over()) and i < depth_limit:
             playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
             actions = playout_board.get_valid_actions(curr_player)
             # print(len(actions))
@@ -160,10 +160,11 @@ class MatrixBoard:
             playout_board.turn_count += 1
             curr_player = PlayerColor.BLUE if curr_player == PlayerColor.RED else PlayerColor.RED
         
-        # if playout_board.game_over():
-        #     return playout_board.winner()
-        # else:
-        #     return self.playout_heuristic()
+        if playout_board.game_over():
+            return playout_board.winner()
+        else:
+            # return self.playout_heuristic()
+            return None
     
     def playout_heuristic(self) -> PlayerColor | None:
         if self.red_power > self.blue_power:

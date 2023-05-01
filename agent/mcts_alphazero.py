@@ -69,16 +69,17 @@ class MCNode:
         # print("--Select--")
         best_score = -math.inf 
         best_child = None
+        # flag = 1 if self.color == PlayerColor.RED else -1
         # if self.board.turn_count < 200 or self.board.red_power < self.board.blue_power:
         #     c = 3   # larger C, more adventurous
         # else:
         #     c = 1
-        # c = 2
+        c = 2 if self.board.turn_count < 100 else 1
         for child in self.children:
-            # child.update_ucb(c)
+            child.update_ucb(c)
             # score = child.ucb + child.q_value
             # score = child.ucb
-            score = child.q_value
+            score = child.q_value + child.ucb
             if score > best_score: 
                 best_score = score 
                 best_child = child
@@ -123,28 +124,36 @@ class MCNode:
             
         return self.select()
     
-    def backpropagate(self, win_score):
+    def backpropagate(self, result, win_score):
         '''
         Use the outcome from the playout to  update the statistics of each node 
         from the newly added node back up to the route.
         '''
         # print("--backpropagate--")
         self.playouts += 1 
+        self.q_value += win_score * (1 if self.color == PlayerColor.RED else -1)
         
-        if type(win_score) == PlayerColor:
-            if self.color == win_score:
-                self.wins += 1
-                self.q_value += 1
-            elif win_score != None:  # lose
-                self.q_value -= 1
-                self.wins -= 1
-        else:
-            if self.color == PlayerColor.RED:
-                self.q_value += win_score
-            else:
-                self.q_value -= win_score
+        if result == self.color:
+            self.wins += 1
+        elif result == self.color.opponent:
+            self.wins -= 1
+        
+        
+        
+        # if type(win_score) == PlayerColor:
+        #     if self.color == result:
+        #         self.wins += 1
+        #         self.q_value += win_score
+        #     elif result != None:  # lose
+        #         self.q_value -= 1
+        #         self.wins -= 1
+        # else:
+        #     if self.color == PlayerColor.RED:
+        #         self.q_value += win_score
+        #     else:
+        #         self.q_value -= win_score
         if self.parent is not None:
-            self.parent.backpropagate(win_score)
+            self.parent.backpropagate(result, win_score)
 
     def playout_model(self):
         tmp = self.board.state
@@ -155,6 +164,20 @@ class MCNode:
         with torch.no_grad():
             test_out = self.model(tmp_t).numpy()
         return test_out[0][0]
+    
+    def playout_eval(self):
+        parent = self.parent
+        result = (self.board.red_power - self.board.blue_power) 
+            
+        if parent == None:
+            return result 
+        
+        if self.color == PlayerColor.RED:
+            result += self.board.red_power - parent.board.red_power
+        else:
+            result += self.board.blue_power - parent.board.blue_power
+        
+        return result
             
 def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]: 
     # root = MCNode(board=board, color=playerColor)
@@ -162,7 +185,7 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
     Perform Monte-Carlo Tree Search ALgorithm. 
     '''
     ### TODO: how to stop when the program reaches time/space limit
-    num_iterations = 50000
+    num_iterations = 1000
     for _ in range(num_iterations): 
         # print("----SEARCH: %d----" %i)
         # Selection
@@ -177,12 +200,14 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
             current_node = current_node.expand()  
             
         # Simulation
-        # result = current_node.board.playout(current_node.color)
-        result = current_node.playout_model()
+        result = current_node.board.playout(current_node.color)
+        # result = None
+        # q_value = current_node.playout_model()
+        q_value = current_node.playout_eval()
         # result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 
-        current_node.backpropagate(result)
+        current_node.backpropagate(result, q_value)
         
         current_node = root
     
