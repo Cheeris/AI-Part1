@@ -74,7 +74,8 @@ class MCNode:
         #     c = 3   # larger C, more adventurous
         # else:
         #     c = 1
-        c = 2 if self.board.turn_count < 100 else 1
+        # c = 2 if self.board.turn_count < 100 else 1
+        c = 0
         for child in self.children:
             child.update_ucb(c)
             # score = child.ucb + child.q_value
@@ -137,8 +138,6 @@ class MCNode:
             self.wins += 1
         elif result == self.color.opponent:
             self.wins -= 1
-        
-        
         
         # if type(win_score) == PlayerColor:
         #     if self.color == result:
@@ -203,7 +202,8 @@ def monte_carlo_tree_search(root: MCNode) -> tuple[Action, MCNode]:
         result = current_node.board.playout(current_node.color)
         # result = None
         # q_value = current_node.playout_model()
-        q_value = current_node.playout_eval()
+        # q_value = current_node.playout_eval()
+        q_value = 0
         # result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 

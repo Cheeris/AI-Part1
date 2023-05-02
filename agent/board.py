@@ -225,3 +225,43 @@ def update_r_q(r, q, dr, dq) -> tuple:
     if q < 0:
         q = 6
     return (r, q)
+
+def calculate_attack_range(state: np.array):
+    domain_state = np.zeros(shape=[2,7,7], dtype=int)
+    curr_player = 0
+    opposite = 1
+    all_dir = [HexDir.Down, HexDir.DownLeft, HexDir.DownRight, 
+            HexDir.Up, HexDir.UpLeft, HexDir.UpRight]
+
+    for player in range(2):
+        for i in range(7):
+            for j in range(7):
+                power = state[player][i][j]
+                if power == 0:
+                    continue
+                for d in all_dir:
+                    r = i
+                    q = j
+                    dr = d.value.r
+                    dq = d.value.q
+                    for p in range(power):
+                        r, q = update_r_q(r, q, dr, dq)
+                        domain_state[player, r, q] = 1
+
+    # num_attack_range = np.count_nonzero(domain_state[0])  
+
+    domain_coodinates = set([tuple(x) for x in np.argwhere(domain_state[curr_player] > 0)])
+    player_coordinates = set([tuple(x) for x in np.argwhere(state[curr_player] > 0)])
+    opposite_coordinates = set([tuple(x) for x in np.argwhere(state[opposite] > 0)])
+    opposite_domain = set([tuple(x) for x in np.argwhere(domain_state[opposite] > 0)])
+    attack_coord = domain_coodinates & opposite_coordinates
+    safeguard_coord = player_coordinates & opposite_domain
+    
+    # overlap_num = len(overlap_coord)
+    # the total power of opposite which can be eaten by the player
+    attack_power = sum([state[opposite][x] for x in attack_coord])
+    
+    # the total power of player which can NOT be eaten by the opposite
+    safeguard_power = sum([state[curr_player][x] for x in safeguard_coord])
+    print(safeguard_coord)
+    return attack_power, safeguard_power
