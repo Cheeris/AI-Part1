@@ -1,4 +1,4 @@
-from alpha_beta.board import MatrixBoard, update_r_q
+from .board import MatrixBoard, update_r_q
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 import random
@@ -81,7 +81,7 @@ def eval(board: MatrixBoard, color: PlayerColor):
     blue = dict(zip(unique, count))
     red_num = sum(red.values())
     blue_num = sum(red.values())
-    # attack_power, safe_power = calculate_attack_range(board.state, color)
+    attack_power, safe_power = calculate_attack_range(board.state, color)
     if color == PlayerColor.RED:
         return 1*(red.get(1,0)-blue.get(1,0))+\
                 2*(red.get(2,0)-blue.get(2,0))+\
@@ -90,7 +90,9 @@ def eval(board: MatrixBoard, color: PlayerColor):
                 5*(red.get(5,0)-blue.get(5,0))+\
                 6*(red.get(6,0)-blue.get(6,0))+\
                 6*(red_num-blue_num)+\
-                6*(board.red_power - board.blue_power)
+                6*(board.red_power - board.blue_power)+\
+                3*attack_power+\
+                3*safe_power
     else:
         return 1*(blue.get(1,0)-red.get(1,0))+\
                 2*(blue.get(2,0)-red.get(2,0))+\
@@ -99,7 +101,9 @@ def eval(board: MatrixBoard, color: PlayerColor):
                 5*(blue.get(5,0)-red.get(5,0))+\
                 6*(blue.get(6,0)-red.get(6,0))+\
                 6*(blue_num-red_num)+\
-                6*(board.blue_power-board.red_power)
+                6*(board.blue_power-board.red_power)+\
+                3*attack_power+\
+                3*safe_power
     
 def key_function(obj):
     util =-100
