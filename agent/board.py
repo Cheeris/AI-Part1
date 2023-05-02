@@ -53,7 +53,7 @@ class MatrixBoard:
                 # Spread
                 for i in range(power):
                     # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
-                    r, q = self.update_r_q(r, q, dr, dq)
+                    r, q = update_r_q(r, q, dr, dq)
                     self.state[curr_player][r][q] += self.state[opponent][r][q] + 1
                     '''
                     if curr_player eats opponent's token, the power of the current player add the power
@@ -99,22 +99,6 @@ class MatrixBoard:
         return next
 
     
-        # Function to update the r,q if they reach -1 or 7
-    def update_r_q(self, r, q, dr, dq) -> tuple:
-        """
-        Update the coordinates if the token reaches the edge.
-        """
-        r += dr
-        q += dq
-        if r > 6:
-            r = 0
-        if r < 0:
-            r = 6
-        if q > 6:
-            q = 0
-        if q < 0:
-            q = 6
-        return (r, q)
     
 
     #function to get all valid actions in the current board
@@ -224,3 +208,20 @@ class MatrixBoard:
                 output += "    "
             output += "\n"
         return output
+
+# Function to update the r,q if they reach -1 or 7
+def update_r_q(r, q, dr, dq) -> tuple:
+    """
+    Update the coordinates if the token reaches the edge.
+    """
+    r += dr
+    q += dq
+    if r > 6:
+        r = 0
+    if r < 0:
+        r = 6
+    if q > 6:
+        q = 0
+    if q < 0:
+        q = 6
+    return (r, q)
