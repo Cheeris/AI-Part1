@@ -32,13 +32,6 @@ class Agent:
         Return the next action to take.
         """
         return random.choice(self.board.get_valid_actions(self._color))
-        #return monte_carlo_tree_search(0, 0, self.board, self._color)
-        # match self._color:
-        #     case PlayerColor.RED:
-        #         return SpawnAction(HexPos(3, 3))
-        #     case PlayerColor.BLUE:
-        #         # This is going to be invalid... BLUE never spawned!
-        #         return SpreadAction(HexPos(3, 3), HexDir.Up)
 
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):

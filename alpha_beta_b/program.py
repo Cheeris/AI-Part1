@@ -33,13 +33,6 @@ class Agent:
         root = ABNode(self.board,self._color)
         root.add_children()
         return minimax_with_alpha_beta(root, self._color,3)
-        # match self._color:
-        #     case PlayerColor.RED:
-        #         return SpawnAction(HexPos(3, 3))
-        #     case PlayerColor.BLUE:
-        #         # This is going to be invalid... BLUE never spawned!
-        #         return SpreadAction(HexPos(3, 3), HexDir.Up)
-
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """

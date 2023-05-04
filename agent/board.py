@@ -16,7 +16,6 @@ class MatrixBoard:
         # create an empty board with each cell representing the power of player
         # channel 1: red 
         # channel 2: blue
-        # self.state = state.copy()
         self.state = np.copy(state)
         self.turn_count = turn_count
         self.red_power = red_power
@@ -41,7 +40,6 @@ class MatrixBoard:
                 q = cell.q
                 dr = direction.value.r
                 dq = direction.value.q
-                # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                 if (color == PlayerColor.RED):
                     curr_player = 0
                     opponent = 1
@@ -53,7 +51,6 @@ class MatrixBoard:
                 
                 # Spread
                 for i in range(power):
-                    # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                     r, q = update_r_q(r, q, dr, dq)
                     self.state[curr_player][r][q] += self.state[opponent][r][q] + 1
                     '''
@@ -95,8 +92,6 @@ class MatrixBoard:
         next = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
         next.apply_action(action, playerColor)
         next.turn_count += 1
-        # next.blue_power += 1 if playerColor == PlayerColor.BLUE else 0
-        # next.red_power += 1 if playerColor == PlayerColor.RED else 0
         return next
     
 
@@ -120,13 +115,6 @@ class MatrixBoard:
                     output.append(SpreadAction(HexPos(r,q), HexDir.UpLeft))
                     output.append(SpreadAction(HexPos(r,q), HexDir.Up))
                     output.append(SpreadAction(HexPos(r,q), HexDir.UpRight))
-        
-        '''
-        for position in empty:
-            if (self.state[opponent][position.r][position.q]==0):
-                output.append(SpawnAction(position))
-        '''
-        
         return output
     
     #function to simulate a game from the current state
@@ -137,23 +125,9 @@ class MatrixBoard:
             playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
             actions = playout_board.get_valid_actions(curr_player)
             
-            # action = actions[random.randint(0, len(actions) - 1)]
             action = random.choice(actions)
-            '''
-            if playout_board.turn_count==6:
-                break
-            '''
-            
             playout_board.apply_action(action, curr_player)
             playout_board.turn_count += 1
-            '''
-            print(action)
-            
-            for action in actions:
-                print("possible action:" + action.__str__())
-        
-            '''
-            
             curr_player = PlayerColor.BLUE if curr_player == PlayerColor.RED else PlayerColor.RED
             
         return playout_board.winner()

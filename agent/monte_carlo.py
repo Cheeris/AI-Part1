@@ -5,7 +5,6 @@ from enum import Enum
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from agent.board import MatrixBoard
-# from abc import abstractmethod
 
 class MCState(Enum):
     UNVISITIED = 0;
@@ -28,7 +27,6 @@ class MCNode:
         self.all_actions = []
         self.action = action
         self.color = color
-        # self.ubc
     
     def is_over(self) -> bool:
         return self.board.game_over()
@@ -49,7 +47,6 @@ class MCNode:
         '''
         Select the child with the highest UCB score.
         '''
-        # print("--Select--")
         best_score = -math.inf 
         best_child = None
         c = 1   # larger C, more adventurous
@@ -66,9 +63,6 @@ class MCNode:
         '''
         Expand the node by adding to the tree a single new child from that node.
         '''
-        # print("--Expand--")
-        # if haven't get all the valid actions
-        # if len(self.all_actions) == 0 and len(self.children) == 0:
         if self.state == MCState.UNVISITIED:
             self.all_actions = self.board.get_valid_actions(self.color)
             self.state = MCState.UNEXPANDED if len(self.all_actions) != 0 else MCState.EXPANDED
@@ -111,11 +105,7 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Matrix
     ### TODO: how to stop when the program reaches time/space limit
     num_iterations = 6
     for i in range(num_iterations): 
-        # print("----SEARCH: %d----" %i)
-        # Selection
         current_node = root
-        # while len(current_node.children) != 0: # find the leaf node
-        #     current_node = current_node.select()
         while current_node.state == MCState.EXPANDED:
             current_node = current_node.select()
             
@@ -125,7 +115,6 @@ def monte_carlo_tree_search(time_limit: float, space_limit: float, board: Matrix
             
         # Simulation
         result = current_node.board.playout(current_node.color)
-        # result = current_node.board.playout_heuristic(current_node.color)
         
         # Backpropagation 
         current_node.backpropagate(result)
