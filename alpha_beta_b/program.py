@@ -32,7 +32,6 @@ class Agent:
         """
         root = ABNode(self.board,self._color)
         root.add_children()
-        child_len = len(root.children)
         return minimax_with_alpha_beta(root, self._color,3)
         # match self._color:
         #     case PlayerColor.RED:

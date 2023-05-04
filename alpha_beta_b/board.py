@@ -121,38 +121,6 @@ class MatrixBoard:
                 output.append(SpawnAction(position))
         return output
     
-    #function to simulate a game from the current state
-    def playout(self, start_color:PlayerColor) -> PlayerColor | None:
-        playout_board = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
-        curr_player = start_color
-        while not (playout_board.game_over()):
-            playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
-            actions = playout_board.get_valid_actions(curr_player)
-            random.seed(1000)
-            action = actions[random.randint(0, len(actions) - 1)]
-            # action = random.choice(actions)
-            playout_board.apply_action(action, curr_player)
-            playout_board.turn_count += 1
-            
-            curr_player = PlayerColor.BLUE if curr_player == PlayerColor.RED else PlayerColor.RED
-            
-        return playout_board.winner()
-    
-    def playout_heuristic(self, start_color:PlayerColor) -> PlayerColor | None:
-        result = PlayerColor.RED if self.red_power > self.blue_power else PlayerColor.BLUE
-        return result
-        
-    # function to get the winner of the board
-    def winner(self) -> PlayerColor | None:
-        if (self.red_power == 0 and self.blue_power == 0):
-            return None
-        elif (abs(self.red_power - self.blue_power) < WIN_POWER_DIFF):
-            return None
-        elif (self.red_power > self.blue_power):
-            return PlayerColor.RED
-        elif (self.red_power < self.blue_power):
-            return PlayerColor.BLUE
-
     def render(self, use_color: bool=False, use_unicode: bool=False) -> str:
         """
         Return a visualisation of the game board via a multiline string. The

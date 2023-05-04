@@ -49,6 +49,11 @@ def alpha_beta(node: ABNode, depth: int, alpha, beta, maximize:bool, color: Play
         return worst
 
 def minimax_with_alpha_beta(node: ABNode, color:PlayerColor, depth:int):
+    '''
+    Use minimax search algorithm.
+    Calculate all the minimum evaluation value of the children of the root, and select
+    the child with the highest evaluation value.
+    '''
     values = dict()
     for child in node.children:
         child.add_children()
@@ -108,7 +113,7 @@ def eval(board: MatrixBoard, color: PlayerColor):
 def key_function(obj):
     util =-100
     util = utility(obj.board, obj.color)
-    return (util, random.random())
+    return (util, random.random())       #random.ramdom() ensures the randomness of selection when utilities are same
     
 def utility(board: MatrixBoard, color: PlayerColor):
     if color == PlayerColor.RED:
