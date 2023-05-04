@@ -132,7 +132,6 @@ def calculate_attack_range(state, color):
                         r, q = update_r_q(r, q, dr, dq)
                         domain_state[player, r, q] = 1
 
-    # num_attack_range = np.count_nonzero(domain_state[0])  
 
     domain_coodinates = set([tuple(x) for x in numpy.argwhere(domain_state[curr_player] > 0)])
     player_coordinates = set([tuple(x) for x in numpy.argwhere(state[curr_player] > 0)])

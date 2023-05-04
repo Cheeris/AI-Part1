@@ -20,8 +20,8 @@ class MatrixBoard:
         self.blue_power = blue_power
         
     def apply_action(self, action: Action, color: PlayerColor):
-        
         match action:
+            # the input action is SpawnAction
             case SpawnAction(cell):
                 r = cell.r
                 q = cell.q
@@ -32,13 +32,12 @@ class MatrixBoard:
                     self.state[1][r][q] = 1
                     self.blue_power += 1
                 pass
-            
+            # the input action is SpreadAction
             case SpreadAction(cell, direction):
                 r = cell.r
                 q = cell.q
                 dr = direction.value.r
                 dq = direction.value.q
-                # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                 if (color == PlayerColor.RED):
                     curr_player = 0
                     opponent = 1
@@ -88,6 +87,7 @@ class MatrixBoard:
             self.blue_power == 0
         ])
     
+    #function to get the next board by applying the action
     def next_board(self, action: Action, playerColor: PlayerColor):
         next = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
         next.apply_action(action, playerColor)
@@ -103,11 +103,10 @@ class MatrixBoard:
         else:
             curr_player = 1
             opponent = 0
-        empty = []
         for r in range(7):
             for q in range(7):
-                if (self.state[curr_player][r][q]==0 and (self.red_power+self.blue_power)<49):
-                    empty.append(HexPos(r, q))
+                if (self.state[curr_player][r][q]==0 and (self.state[opponent][r][q]==0) and (self.red_power+self.blue_power)<49):
+                    output.append(SpawnAction(HexPos(r,q)))
                 elif (self.state[curr_player][r][q] !=0 ):
                     output.append(SpreadAction(HexPos(r,q), HexDir.DownRight))
                     output.append(SpreadAction(HexPos(r,q), HexDir.Down))
@@ -116,9 +115,6 @@ class MatrixBoard:
                     output.append(SpreadAction(HexPos(r,q), HexDir.Up))
                     output.append(SpreadAction(HexPos(r,q), HexDir.UpRight))
         
-        for position in empty:
-            if (self.state[opponent][position.r][position.q]==0):
-                output.append(SpawnAction(position))
         return output
     
     def render(self, use_color: bool=False, use_unicode: bool=False) -> str:
