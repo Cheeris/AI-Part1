@@ -3,6 +3,8 @@ from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 import random
 import numpy
+
+TOP_K = 10
 class ABNode:
     def __init__(self, board: MatrixBoard, color: PlayerColor):
         self.board = MatrixBoard(board.state, board.turn_count, board.red_power, board.blue_power)
@@ -19,7 +21,7 @@ class ABNode:
             all_children.append(child)
         all_children.sort(key = key_function)
         # use top K algorithm: select k nodes with highest utility
-        for child in all_children[:10]:
+        for child in all_children[:TOP_K]:
             self.children.append(child)
 
 
@@ -38,7 +40,6 @@ def alpha_beta(node: ABNode, depth: int, alpha, beta, maximize:bool, color: Play
         return best
     else:
         worst = float('inf')
-        child_len = len(node.children)
         for child in node.children:
             child.add_children()
             child_eval = alpha_beta(child, depth-1, alpha, beta, True, color)
@@ -61,20 +62,6 @@ def minimax_with_alpha_beta(node: ABNode, color:PlayerColor, depth:int):
     return random.choice(choices)
 
 def eval(board: MatrixBoard, color: PlayerColor):
-    '''
-    red_num =0
-    blue_num = 0
-    red = [0,0,0,0,0,0]
-    blue = [0,0,0,0,0,0]
-    for r in range(7):
-        for q in range(7):
-            if board.state[0][r][q] != 0:
-                red[board.state[0][r][q]-1] +=1
-                red_num+=1
-            if board.state[1][r][q] != 0:
-                blue[board.state[1][r][q]-1] +=1
-                blue_num+=1
-    '''
     unique,count = numpy.unique(board.state[0],return_counts=True)
     red = dict(zip(unique, count))
     unique,count = numpy.unique(board.state[1],return_counts=True)
@@ -102,7 +89,7 @@ def eval(board: MatrixBoard, color: PlayerColor):
                 6*(board.blue_power-board.red_power)
     
 def key_function(obj):
-    util =-100
+    util = -100
     util = utility(obj.board, obj.color)
     return (util, random.random())
     

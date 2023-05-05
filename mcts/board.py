@@ -49,6 +49,7 @@ class MatrixBoard:
                 
                 # Spread
                 for i in range(power):
+                    # print("r=%d, q=%d, dr=%d, dq=%d" %(r, q, dr, dq))
                     r, q = update_r_q(r, q, dr, dq)
                     self.state[curr_player][r][q] += self.state[opponent][r][q] + 1
                     '''
@@ -85,6 +86,17 @@ class MatrixBoard:
             self.red_power == 0,
             self.blue_power == 0
         ])
+        
+    # function to get the winner of the board
+    def winner(self) -> PlayerColor | None:
+        if (self.red_power == 0 and self.blue_power == 0):
+            return None
+        elif (abs(self.red_power - self.blue_power) < WIN_POWER_DIFF):
+            return None
+        elif (self.red_power > self.blue_power):
+            return PlayerColor.RED
+        elif (self.red_power < self.blue_power):
+            return PlayerColor.BLUE
     
     #function to get the next board by applying the action
     def next_board(self, action: Action, playerColor: PlayerColor):
@@ -115,6 +127,35 @@ class MatrixBoard:
                     output.append(SpreadAction(HexPos(r,q), HexDir.UpRight))
         
         return output
+    
+    #function to simulate a game from the current state
+    def playout(self, start_color:PlayerColor) -> PlayerColor | None:
+        playout_board = MatrixBoard(self.state, self.turn_count, self.red_power, self.blue_power)
+        curr_player = start_color
+        depth_limit = 150
+        i = 0
+        while (not playout_board.game_over() and i < depth_limit):
+            playout_board = MatrixBoard(playout_board.state, playout_board.turn_count, playout_board.red_power, playout_board.blue_power)
+            actions = playout_board.get_valid_actions(curr_player)
+            action = random.choice(actions)
+            playout_board.apply_action(action, curr_player)
+            playout_board.turn_count += 1
+            curr_player = curr_player.opponent
+            i += 1
+            
+        if playout_board.game_over():
+            return playout_board.winner()
+        else:
+            return self.playout_heuristic()
+        
+    def playout_heuristic(self) -> PlayerColor | None:
+        if self.red_power > self.blue_power:
+            result = PlayerColor.RED
+        elif self.red_power == self.blue_power:
+            result =  None
+        else:
+            result = PlayerColor.BLUE
+        return result
     
     def render(self, use_color: bool=False, use_unicode: bool=False) -> str:
         """

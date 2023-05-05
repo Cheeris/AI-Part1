@@ -4,9 +4,8 @@ from agent.board import MatrixBoard
 import numpy as np
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
-from agent.monte_carlo import monte_carlo_tree_search
+from .alpha_beta import alpha_beta, ABNode, eval, minimax_with_alpha_beta
 import random
-
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
 # spreads a token at the centre of the board if playing as BLUE. This is
@@ -16,7 +15,7 @@ import random
 class Agent:
     def __init__(self, color: PlayerColor, **referee: dict):
         """
-        Initialise the agent.s
+        Initialise the agent.
         """
         self._color = color
         self.board = MatrixBoard(np.zeros([2,7,7], dtype=int), 0, 0, 0)
@@ -31,8 +30,9 @@ class Agent:
         """
         Return the next action to take.
         """
-        return random.choice(self.board.get_valid_actions(self._color))
-
+        root = ABNode(self.board,self._color)
+        root.add_children()
+        return minimax_with_alpha_beta(root, self._color,3)
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """

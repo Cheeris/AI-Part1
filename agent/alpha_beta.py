@@ -3,6 +3,9 @@ from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 import random
 import numpy
+
+TOP_K = 10
+
 class ABNode:
     def __init__(self, board: MatrixBoard, color: PlayerColor):
         self.board = MatrixBoard(board.state, board.turn_count, board.red_power, board.blue_power)
@@ -19,7 +22,7 @@ class ABNode:
             all_children.append(child)
         all_children.sort(key = key_function)
         # use top K algorithm: select k nodes with highest utility
-        for child in all_children[:10]:
+        for child in all_children[:TOP_K]:
             self.children.append(child)
 
 
@@ -38,7 +41,6 @@ def alpha_beta(node: ABNode, depth: int, alpha, beta, maximize:bool, color: Play
         return best
     else:
         worst = float('inf')
-        child_len = len(node.children)
         for child in node.children:
             child.add_children()
             child_eval = alpha_beta(child, depth-1, alpha, beta, True, color)
@@ -102,7 +104,8 @@ def eval(board: MatrixBoard, color: PlayerColor):
 def key_function(obj):
     util =-100
     util = utility(obj.board, obj.color)
-    return (util, random.random())       #random.ramdom() ensures the randomness of selection when utilities are same
+    # random() ensures the randomness of selection when utilities are same
+    return (util, random.random())       
     
 def utility(board: MatrixBoard, color: PlayerColor):
     if color == PlayerColor.RED:
@@ -132,15 +135,14 @@ def calculate_attack_range(state, color):
                         r, q = update_r_q(r, q, dr, dq)
                         domain_state[player, r, q] = 1
 
-
     domain_coodinates = set([tuple(x) for x in numpy.argwhere(domain_state[curr_player] > 0)])
     player_coordinates = set([tuple(x) for x in numpy.argwhere(state[curr_player] > 0)])
     opposite_coordinates = set([tuple(x) for x in numpy.argwhere(state[opposite] > 0)])
     opposite_domain = set([tuple(x) for x in numpy.argwhere(domain_state[opposite] > 0)])
     attack_coord = domain_coodinates & opposite_coordinates
-    safeguard_coord = player_coordinates & opposite_domain
+    unsafe_coord = player_coordinates & opposite_domain
+    safeguard_coord = player_coordinates - unsafe_coord
     
-    # overlap_num = len(overlap_coord)
     # the total power of opposite which can be eaten by the player
     attack_power = sum([state[opposite][x] for x in attack_coord])
     
